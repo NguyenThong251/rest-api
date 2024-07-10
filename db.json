@@ -33,13 +33,13 @@
   ],
   "order": [
     {
-      "id": 1,
+      "id": "1",
       "bill": 1
     }
   ],
   "bill": [
     {
-      "id": 1,
+      "id": "1",
       "table": 1,
       "total": 10000,
       "product": "products"
@@ -47,7 +47,7 @@
   ],
   "products": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Pizza 1",
       "thumbnail": [
         "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGl6emF8ZW58MHx8MHx8fDA%3D",
@@ -57,10 +57,10 @@
       "price": 10000,
       "price_old": 15000,
       "description": "Crisp romaine lettuce, parmesan cheese, and croutons with Caesar dressing.",
-      "category": 1
+      "category_id": 1
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "Pizza 2",
       "thumbnail": [
         "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8cGl6emF8ZW58MHx8MHx8fDA%3D",
@@ -73,12 +73,12 @@
       "category_id": 1
     },
     {
-      "id": 3,
-      "name": "Sandwich 1",
+      "id": "3",
+      "name": "Sandwich 2",
       "thumbnail": [
-        "https://images.unsplash.com/photo-1504937551116-cb8097e6f02a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c2FuZHdpY2h8ZW58MHx8MHx8fDA%3D",
-        "https://images.unsplash.com/photo-1504937551116-cb8097e6f02a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c2FuZHdpY2h8ZW58MHx8MHx8fDA%3D",
-        "https://images.unsplash.com/photo-1504937551116-cb8097e6f02a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c2FuZHdpY2h8ZW58MHx8MHx8fDA%3D"
+        "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGl6emF8ZW58MHx8MHx8fDA%3D",
+        "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGl6emF8ZW58MHx8MHx8fDA%3D",
+        "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGl6emF8ZW58MHx8MHx8fDA%3D"
       ],
       "price": 9000,
       "price_old": 12000,
@@ -86,28 +86,38 @@
       "category_id": 2
     },
     {
-      "id": 1720154740729,
-      "name": "ttt",
+      "id": 1720596761678,
+      "name": "thong",
       "thumbnail": [
-        "blob:http://localhost:3000/d28841bb-332d-4241-864e-3536eb058ab6",
-        "blob:http://localhost:3000/c5a4a5b3-41c4-42a9-b938-4bdb9e65fdf4",
-        "blob:http://localhost:3000/b5735b9e-308e-4638-ba4d-0a2f5d5504f9"
+        "https://cataas.com/cat/cute"
       ],
       "price": 1,
       "price_old": 1,
-      "description": "tttt",
+      "description": "ththththth",
       "category_id": 1
     }
   ],
   "upload": [],
   "categories": [
     {
-      "id": 1,
+      "id": "1",
       "name": "pizza"
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "sandwich"
+    }
+  ],
+  "api": [
+    {
+      "id": "1",
+      "email": "test1@google.com",
+      "fullname": "thong",
+      "isActive": true,
+      "role": [
+        "admin"
+      ],
+      "token": ""
     }
   ]
 }

@@ -1,8 +1,17 @@
 {
-  "dependencies": {
-    "json-server": "^1.0.0-beta.1"
-  },
+  "name": "express-nodemon-example",
+  "version": "1.0.0",
+  "description": "An example Express.js project with Nodemon",
+  "main": "app.js",
   "scripts": {
-    "start": "json-server --watch db.json"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^8.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
