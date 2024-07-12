@@ -10,30 +10,58 @@ const dbConfig = require("./config");
 app.use(express.json()); // Thêm middleware này để parse JSON
 
 // Dữ liệu giả định (mock data)
-const mockData = {
-  users: [
-    { id: 1, name: "John Doe", email: "john.doe@example.com" },
-    { id: 2, name: "Jane Smith", email: "jane.smith@example.com" },
-  ],
-};
+// const mockData = {
+//   users: [
+//     { id: 1, name: "John Doe", email: "john.doe@example.com" },
+//     { id: 2, name: "Jane Smith", email: "jane.smith@example.com" },
+//   ],
+// };
 
 // Schema và Model cho MongoDB
-const userSchema = new mongoose.Schema(
-  {
-    name: String,
-    email: String,
-  },
-  { versionKey: false }
-);
-const productSchema = new mongoose.Schema(
-  {
-    name: String,
-    price: Number,
-  },
-  { versionKey: false }
-);
-const User = mongoose.model("user", userSchema);
-const Product = mongoose.model("product", productSchema);
+// const userSchema = new mongoose.Schema(
+//   {
+//     username: String,
+//     phone: Number,
+//     isAdmin: Number,
+//     email: String,
+//     password: String,
+//     point: Number,
+//   },
+//   { versionKey: false }
+// );
+// const productSchema = new mongoose.Schema(
+//   {
+//     name: String,
+//     price: Number,
+//     description: String,
+//     seller: Number,
+//     quantity: Number,
+//     category_id: mongoose.Schema.Types.ObjectId,
+//   },
+//   { versionKey: false }
+// );
+// const categorySchema = new mongoose.Schema(
+//   {
+//     name: String,
+//     image: String,
+//   },
+//   { versionKey: false }
+// );
+// const thumbnailSchema = new mongoose.Schema(
+//   {
+//     image: String,
+//     product_id: mongoose.Schema.Types.ObjectId,
+//   },
+//   { versionKey: false }
+// );
+const User = require("./models/User");
+const Product = require("./models/Product");
+const Category = require("./models/Category");
+const Thumbnail = require("./models/Thumbnail");
+// const User = mongoose.model("user", userSchema);
+// const Product = mongoose.model("product", productSchema);
+// const Category = mongoose.model("category", categorySchema);
+// const Thumbnail = mongoose.model("thumbnail", thumbnailSchema);
 
 // Kết nối đến MongoDB Atlas
 mongoose
@@ -47,19 +75,242 @@ mongoose
   });
 
 // Tạo get endpoint product  trả về JSON
+// app.get("/products", async (req, res) => {
+//   try {
+//     // Kiểm tra kết nối đến MongoDB
+//     if (mongoose.connection.readyState === 1) {
+//       const products = await Product.find();
+//       res.json(products);
+//     } else {
+//       throw new Error("MongoDB not connected");
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     // Trả về dữ liệu giả định nếu kết nối thất bại
+//     res.json(mockData.products);
+//   }
+// });
+//Tạo endpoint GET để lấy danh sách products kèm theo categories và thumbnails
 app.get("/products", async (req, res) => {
   try {
-    // Kiểm tra kết nối đến MongoDB
     if (mongoose.connection.readyState === 1) {
-      const products = await Product.find();
+      const products = await Product.aggregate([
+        {
+          $lookup: {
+            from: "categories",
+            localField: "category_id",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        {
+          $lookup: {
+            from: "thumbnails",
+            localField: "_id",
+            foreignField: "product_id",
+            as: "thumbnails",
+          },
+        },
+        {
+          $unwind: "$category",
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            price: 1,
+            description: 1,
+            seller: 1,
+            quantity: 1,
+            category: {
+              _id: "$category._id",
+              name: "$category.name",
+              image: "$category.image",
+            },
+            thumbnails: {
+              $map: {
+                input: "$thumbnails",
+                as: "thumb",
+                in: "$$thumb.image",
+              },
+            },
+          },
+        },
+      ]);
+      console.log("Products:", products);
       res.json(products);
     } else {
       throw new Error("MongoDB not connected");
     }
   } catch (error) {
     console.log(error);
-    // Trả về dữ liệu giả định nếu kết nối thất bại
-    res.json(mockData.products);
+    res.status(500).json({ message: "Failed to get products", error });
+  }
+});
+// GET CATEGORY
+app.get("/categories", async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.json(categories);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get categories", error });
+  }
+});
+// POST category
+app.post("/categories", async (req, res) => {
+  try {
+    const { name, image } = req.body;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!name || !image) {
+      return res.status(400).json({ message: "Name and image are required" });
+    }
+
+    // Tạo một đối tượng Category mới
+    const newCategory = new Category({
+      name,
+      image,
+    });
+
+    // Lưu đối tượng Category vào MongoDB
+    await newCategory.save();
+
+    // Trả về thông tin của Category vừa được tạo
+    res.status(201).json(newCategory);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create category", error });
+  }
+});
+// PUT category
+app.put("/categories/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, image } = req.body;
+
+  try {
+    if (!name || !image) {
+      return res.status(400).json({ message: "Name and image are required" });
+    }
+
+    const updatedCategory = await Category.findByIdAndUpdate(
+      id,
+      { name, image },
+      { new: true } // Trả về document đã được cập nhật
+    );
+
+    if (updatedCategory) {
+      res.json(updatedCategory);
+    } else {
+      res.status(404).json({ message: "Category not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to update category", error });
+  }
+});
+// DELETE category
+app.delete("/categories/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await Category.findByIdAndDelete(id);
+
+    if (result) {
+      res.json({ message: "Category deleted successfully", category: result });
+    } else {
+      res.status(404).json({ message: "Category not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to delete category", error });
+  }
+});
+// // GET thumbnails
+app.get("/thumbnails", async (req, res) => {
+  try {
+    const thumbnails = await Thumbnail.find();
+    res.json(thumbnails);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get thumbnails", error });
+  }
+});
+// POST thumbnail
+app.post("/thumbnails", async (req, res) => {
+  try {
+    const { image, product_id } = req.body;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!image || !product_id) {
+      return res
+        .status(400)
+        .json({ message: "Image and product_id are required" });
+    }
+
+    // Tạo một đối tượng Thumbnail mới
+    const newThumbnail = new Thumbnail({
+      image,
+      product_id: new mongoose.Types.ObjectId(product_id),
+    });
+
+    // Lưu đối tượng Thumbnail vào MongoDB
+    await newThumbnail.save();
+
+    // Trả về thông tin của Thumbnail vừa được tạo
+    res.status(201).json(newThumbnail);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create thumbnail", error });
+  }
+});
+// PUT THUMBNAIL
+app.put("/thumbnails/:id", async (req, res) => {
+  const { id } = req.params;
+  const { image, product_id } = req.body;
+
+  try {
+    if (!image || !product_id) {
+      return res
+        .status(400)
+        .json({ message: "Image and product_id are required" });
+    }
+
+    const updatedThumbnail = await Thumbnail.findByIdAndUpdate(
+      id,
+      { image, product_id: new mongoose.Types.ObjectId(product_id) },
+      { new: true } // Trả về document đã được cập nhật
+    );
+
+    if (updatedThumbnail) {
+      res.json(updatedThumbnail);
+    } else {
+      res.status(404).json({ message: "Thumbnail not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to update thumbnail", error });
+  }
+});
+// DELETE THUMBNAIL
+
+app.delete("/thumbnails/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await Thumbnail.findByIdAndDelete(id);
+
+    if (result) {
+      res.json({
+        message: "Thumbnail deleted successfully",
+        thumbnail: result,
+      });
+    } else {
+      res.status(404).json({ message: "Thumbnail not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to delete thumbnail", error });
   }
 });
 // endpoint post product
@@ -79,6 +330,7 @@ app.delete("/products/:id", async (req, res) => {
   const { id } = req.params;
   try {
     if (mongoose.connection.readyState === 1) {
+      /// orm mông
       const result = await Product.findByIdAndDelete(id);
       if (result) {
         res.json({ message: "Product deleted successfully", product: result });
@@ -178,9 +430,16 @@ app.put("/users/:id", async (req, res) => {
 });
 // Tạo endpoint POST để thêm user mới
 app.post("/users", async (req, res) => {
-  const { name, email } = req.body;
+  const { username, phone, isAdmin, email, password, point } = req.body;
   try {
-    const newUser = new User({ name, email });
+    const newUser = new User({
+      username,
+      phone,
+      isAdmin,
+      email,
+      password,
+      point,
+    });
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);
   } catch (error) {
