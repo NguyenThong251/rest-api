@@ -2,13 +2,13 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const port = 3000;
-
+const cors = require("cors");
 // Cấu hình MongoDB Atlas
 const dbConfig = require("./config");
 
 // Middleware để xử lý JSON
 app.use(express.json()); // Thêm middleware này để parse JSON
-
+app.use(cors());
 // Dữ liệu giả định (mock data)
 // const mockData = {
 //   users: [
