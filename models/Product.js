@@ -7,6 +7,7 @@ const productSchema = new mongoose.Schema(
     description: String,
     seller: Number,
     quantity: Number,
+    // category_id: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
     category_id: mongoose.Schema.Types.ObjectId,
   },
   { versionKey: false }

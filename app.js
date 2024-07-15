@@ -85,7 +85,53 @@ app.get("/products", async (req, res) => {
 app.get("/products/:id", async (req, res) => {
   try {
     const productId = req.params.id;
-    const results = await Product.findOne({ _id: productId });
+    console.log(productId);
+    const results = await Product.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(productId) },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category_id",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $lookup: {
+          from: "thumbnails",
+          localField: "_id",
+          foreignField: "product_id",
+          as: "thumbnails",
+        },
+      },
+      {
+        $unwind: "$category",
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          price: 1,
+          description: 1,
+          seller: 1,
+          quantity: 1,
+          category: {
+            _id: "$category._id",
+            name: "$category.name",
+            image: "$category.image",
+          },
+          thumbnails: {
+            $map: {
+              input: "$thumbnails",
+              as: "thumb",
+              in: "$$thumb.image",
+            },
+          },
+        },
+      },
+    ]);
     res.json(results);
   } catch (error) {
     console.error("Error fetching product:", error);
