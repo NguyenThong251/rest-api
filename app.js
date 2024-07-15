@@ -7,63 +7,13 @@ const cors = require("cors");
 const dbConfig = require("./config");
 
 // Middleware để xử lý JSON
-app.use(express.json()); // Thêm middleware này để parse JSON
+app.use(express.json());
 app.use(cors());
-// Dữ liệu giả định (mock data)
-// const mockData = {
-//   users: [
-//     { id: 1, name: "John Doe", email: "john.doe@example.com" },
-//     { id: 2, name: "Jane Smith", email: "jane.smith@example.com" },
-//   ],
-// };
 
-// Schema và Model cho MongoDB
-// const userSchema = new mongoose.Schema(
-//   {
-//     username: String,
-//     phone: Number,
-//     isAdmin: Number,
-//     email: String,
-//     password: String,
-//     point: Number,
-//   },
-//   { versionKey: false }
-// );
-// const productSchema = new mongoose.Schema(
-//   {
-//     name: String,
-//     price: Number,
-//     description: String,
-//     seller: Number,
-//     quantity: Number,
-//     category_id: mongoose.Schema.Types.ObjectId,
-//   },
-//   { versionKey: false }
-// );
-// const categorySchema = new mongoose.Schema(
-//   {
-//     name: String,
-//     image: String,
-//   },
-//   { versionKey: false }
-// );
-// const thumbnailSchema = new mongoose.Schema(
-//   {
-//     image: String,
-//     product_id: mongoose.Schema.Types.ObjectId,
-//   },
-//   { versionKey: false }
-// );
 const User = require("./models/User");
 const Product = require("./models/Product");
 const Category = require("./models/Category");
 const Thumbnail = require("./models/Thumbnail");
-// const User = mongoose.model("user", userSchema);
-// const Product = mongoose.model("product", productSchema);
-// const Category = mongoose.model("category", categorySchema);
-// const Thumbnail = mongoose.model("thumbnail", thumbnailSchema);
-
-// Kết nối đến MongoDB Atlas
 mongoose
   .connect(dbConfig.mongoURI, {
     useNewUrlParser: true,
@@ -74,22 +24,6 @@ mongoose
     console.error("MongoDB connection error:", err);
   });
 
-// Tạo get endpoint product  trả về JSON
-// app.get("/products", async (req, res) => {
-//   try {
-//     // Kiểm tra kết nối đến MongoDB
-//     if (mongoose.connection.readyState === 1) {
-//       const products = await Product.find();
-//       res.json(products);
-//     } else {
-//       throw new Error("MongoDB not connected");
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     // Trả về dữ liệu giả định nếu kết nối thất bại
-//     res.json(mockData.products);
-//   }
-// });
 //Tạo endpoint GET để lấy danh sách products kèm theo categories và thumbnails
 app.get("/products", async (req, res) => {
   try {
@@ -147,6 +81,18 @@ app.get("/products", async (req, res) => {
     res.status(500).json({ message: "Failed to get products", error });
   }
 });
+// Get product by ID with category and thumbnails
+app.get("/products/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const results = await Product.findOne({ _id: productId });
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({ message: "Failed to get product", error });
+  }
+});
+
 // GET CATEGORY
 app.get("/categories", async (req, res) => {
   try {
@@ -315,9 +261,16 @@ app.delete("/thumbnails/:id", async (req, res) => {
 });
 // endpoint post product
 app.post("/products", async (req, res) => {
-  const { name, price } = req.body;
+  const { name, price, description, seller, quantity, category_id } = req.body;
   try {
-    const newProduct = new Product({ name, price });
+    const newProduct = new Product({
+      name,
+      price,
+      description,
+      seller,
+      quantity,
+      category_id,
+    });
     const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);
   } catch (error) {
