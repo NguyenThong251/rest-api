@@ -26,6 +26,17 @@ mongoose
     console.error("MongoDB connection error:", err);
   });
 // ORDER
+// GET ID
+app.get("/order/:id", async (req, res) => {
+  try {
+    const OrderId = req.params.id;
+    const order = await Order.findById(OrderId);
+    res.json(order);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get Order", error });
+  }
+});
 app.get("/order", async (req, res) => {
   try {
     const table = await Order.find();
