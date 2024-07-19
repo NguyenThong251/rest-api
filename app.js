@@ -14,6 +14,7 @@ const User = require("./models/User");
 const Product = require("./models/Product");
 const Category = require("./models/Category");
 const Thumbnail = require("./models/Thumbnail");
+const Table = require("./models/Table");
 mongoose
   .connect(dbConfig.mongoURI, {
     useNewUrlParser: true,
@@ -23,6 +24,85 @@ mongoose
   .catch((err) => {
     console.error("MongoDB connection error:", err);
   });
+
+// TABLE
+app.get("/table", async (req, res) => {
+  try {
+    const table = await Table.find();
+    res.json(table);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get Table", error });
+  }
+});
+// POST category
+app.post("/table", async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!name) {
+      return res.status(400).json({ message: "Name and image are required" });
+    }
+
+    // Tạo một đối tượng Category mới
+    const newTable = new Table({
+      name,
+    });
+
+    // Lưu đối tượng Category vào MongoDB
+    await newTable.save();
+
+    // Trả về thông tin của Category vừa được tạo
+    res.status(201).json(newTable);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create Table", error });
+  }
+});
+// PUT category
+app.put("/table/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+
+  try {
+    if (!name) {
+      return res.status(400).json({ message: "Name and image are required" });
+    }
+
+    const updatedTable = await Table.findByIdAndUpdate(
+      id,
+      { name },
+      { new: true } // Trả về document đã được cập nhật
+    );
+
+    if (updatedTable) {
+      res.json(updatedTable);
+    } else {
+      res.status(404).json({ message: "Table not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to update category", error });
+  }
+});
+// DELETE category
+app.delete("/table/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await Table.findByIdAndDelete(id);
+
+    if (result) {
+      res.json({ message: "Table deleted successfully", table: result });
+    } else {
+      res.status(404).json({ message: "Table not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to delete Table", error });
+  }
+});
 
 //Tạo endpoint GET để lấy danh sách products kèm theo categories và thumbnails
 app.get("/products", async (req, res) => {
