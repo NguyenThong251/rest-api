@@ -15,6 +15,7 @@ const Product = require("./models/Product");
 const Category = require("./models/Category");
 const Thumbnail = require("./models/Thumbnail");
 const Table = require("./models/Table");
+const Order = require("./models/Order");
 mongoose
   .connect(dbConfig.mongoURI, {
     useNewUrlParser: true,
@@ -24,7 +25,32 @@ mongoose
   .catch((err) => {
     console.error("MongoDB connection error:", err);
   });
+// ORDER
+app.post("/order", async (req, res) => {
+  try {
+    const { table_id, sub_total, products, user_id } = req.body;
+    console.log(user_id);
+    // Kiểm tra dữ liệu đầu vào
+    if (!table_id || !sub_total || !products) {
+      return res.status(400).json({ message: "Name and image are required" });
+    }
 
+    // Tạo một đối tượng Category mới
+    const newOrder = new Order({
+      table_id,
+      sub_total,
+      products,
+      user_id,
+    });
+
+    await newOrder.save();
+
+    res.status(201).json(newOrder);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create Order", error });
+  }
+});
 // TABLE
 app.get("/table", async (req, res) => {
   try {

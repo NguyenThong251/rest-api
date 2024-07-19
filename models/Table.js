@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const productSchema = new mongoose.Schema(
+const tableSchema = new mongoose.Schema(
   {
     name: String,
     // category_id: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
@@ -8,4 +8,4 @@ const productSchema = new mongoose.Schema(
   { versionKey: false }
 );
 
-module.exports = mongoose.model("Table", productSchema);
+module.exports = mongoose.model("Table", tableSchema);
