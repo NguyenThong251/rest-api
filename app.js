@@ -26,6 +26,42 @@ mongoose
     console.error("MongoDB connection error:", err);
   });
 // ORDER
+app.get("/order", async (req, res) => {
+  try {
+    const table = await Order.find();
+    res.json(table);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get Table", error });
+  }
+});
+//  PUT
+app.put("/order/:id", async (req, res) => {
+  const { id } = req.params;
+  const { table_id, sub_total, products, user_id } = req.body;
+
+  try {
+    if (!table_id || !sub_total || !products) {
+      return res.status(400).json({ message: "Name and image are required" });
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { table_id, sub_total, products, user_id },
+      { new: true } // Trả về document đã được cập nhật
+    );
+
+    if (updatedOrder) {
+      res.json(updatedOrder);
+    } else {
+      res.status(404).json({ message: "Table not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to update category", error });
+  }
+});
+// POST
 app.post("/order", async (req, res) => {
   try {
     const { table_id, sub_total, products, user_id } = req.body;
@@ -49,6 +85,23 @@ app.post("/order", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Failed to create Order", error });
+  }
+});
+// DELETE
+app.delete("/order/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await Order.findByIdAndDelete(id);
+
+    if (result) {
+      res.json({ message: "Table deleted successfully", table: result });
+    } else {
+      res.status(404).json({ message: "Order not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to delete Order", error });
   }
 });
 // TABLE
