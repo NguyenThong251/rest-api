@@ -86,7 +86,7 @@ app.put("/table/:id", async (req, res) => {
     res.status(500).json({ message: "Failed to update category", error });
   }
 });
-// DELETE category
+// DELETE tbale
 app.delete("/table/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -103,7 +103,17 @@ app.delete("/table/:id", async (req, res) => {
     res.status(500).json({ message: "Failed to delete Table", error });
   }
 });
-
+// GET ID
+app.get("/table/:id", async (req, res) => {
+  try {
+    const tbaleId = req.params.id;
+    const table = await Table.findById(tbaleId);
+    res.json(table);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get Table", error });
+  }
+});
 //Tạo endpoint GET để lấy danh sách products kèm theo categories và thumbnails
 app.get("/products", async (req, res) => {
   try {
