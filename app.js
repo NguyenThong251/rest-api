@@ -16,6 +16,7 @@ const Category = require("./models/Category");
 const Thumbnail = require("./models/Thumbnail");
 const Table = require("./models/Table");
 const Order = require("./models/Order");
+const Cart = require("./models/Cart");
 mongoose
   .connect(dbConfig.mongoURI, {
     useNewUrlParser: true,
@@ -25,7 +26,59 @@ mongoose
   .catch((err) => {
     console.error("MongoDB connection error:", err);
   });
+
+// CART
+app.post("/cart", async (req, res) => {
+  try {
+    const { products, user_id } = req.body;
+    // Kiểm tra dữ liệu đầu vào
+    if (!products || !user_id) {
+      return res.status(400).json({ message: "không thành công" });
+    }
+
+    // Tạo một đối tượng Category mới
+    const newCart = new Cart({
+      products,
+      user_id,
+    });
+
+    await newCart.save();
+
+    res.status(201).json(newCart);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create Order", error });
+  }
+});
+//  PUT
+app.put("/cart/:id", async (req, res) => {
+  const { id } = req.params;
+  const { products, user_id } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "ID không hợp lệ" });
+  }
+  try {
+    if (!products || !user_id) {
+      return res.status(400).json({ message: "lỗi" });
+    }
+    const updatedCart = await Cart.findByIdAndUpdate(
+      id,
+      { products, user_id },
+      { new: true }
+    );
+
+    if (updatedCart) {
+      res.json(updatedCart);
+    } else {
+      res.status(404).json({ message: "Table not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to update category", error });
+  }
+});
 // ORDER
+
 // GET ID
 app.get("/order/:id", async (req, res) => {
   try {
