@@ -28,6 +28,23 @@ mongoose
   });
 
 // CART
+// DELETE
+app.delete("/cart/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const result = await Cart.findOneAndDelete({ user_id: userId });
+
+    if (result) {
+      res.json({ message: "Table deleted successfully", table: result });
+    } else {
+      res.status(404).json({ message: "Order not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to delete Order", error });
+  }
+});
 // GET ID
 app.get("/cart/:userId", async (req, res) => {
   try {
