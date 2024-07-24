@@ -28,15 +28,25 @@ mongoose
   });
 
 // CART
+// GET ID
+app.get("/cart/:userId", async (req, res) => {
+  try {
+    const cartId = req.params.userId;
+    const cart = await Cart.findOne({ user_id: cartId });
+    console.log(cart);
+    res.json(cart);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get Cart", error });
+  }
+});
 app.post("/cart", async (req, res) => {
   try {
     const { products, user_id } = req.body;
-    // Kiểm tra dữ liệu đầu vào
     if (!products || !user_id) {
       return res.status(400).json({ message: "không thành công" });
     }
 
-    // Tạo một đối tượng Category mới
     const newCart = new Cart({
       products,
       user_id,
@@ -57,12 +67,13 @@ app.put("/cart/:id", async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "ID không hợp lệ" });
   }
+  if (!products || !user_id) {
+    return res.status(400).json({ message: "lỗi" });
+  }
+
   try {
-    if (!products || !user_id) {
-      return res.status(400).json({ message: "lỗi" });
-    }
-    const updatedCart = await Cart.findByIdAndUpdate(
-      id,
+    const updatedCart = await Cart.findOneAndUpdate(
+      { user_id: id },
       { products, user_id },
       { new: true }
     );
