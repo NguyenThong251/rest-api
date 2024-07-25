@@ -17,6 +17,7 @@ const Thumbnail = require("./models/Thumbnail");
 const Table = require("./models/Table");
 const Order = require("./models/Order");
 const Cart = require("./models/Cart");
+const OrderChef = require("./models/OrderChef");
 mongoose
   .connect(dbConfig.mongoURI, {
     useNewUrlParser: true,
@@ -26,6 +27,39 @@ mongoose
   .catch((err) => {
     console.error("MongoDB connection error:", err);
   });
+
+// ORDER CHEF
+// POST
+app.post("/orderchef", async (req, res) => {
+  try {
+    const { table_id, products, date, status } = req.body;
+    // Kiểm tra dữ liệu đầu vào
+    console.log(table_id, products, date, status);
+    if (!table_id || !products || !date) {
+      return res.status(400).json({ message: "lỗi" });
+    }
+    // Kiểm tra xem status có giá trị hợp lệ hay không
+    const allowedStatuses = ["pending", "completed", "canceled"];
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: "Trạng thái không hợp lệ" });
+    }
+
+    // Tạo một đối tượng Category mới
+    const newOrderchef = new OrderChef({
+      table_id,
+      products,
+      date,
+      status,
+    });
+
+    await newOrderchef.save();
+
+    res.status(201).json(newOrderchef);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create Order", error });
+  }
+});
 
 // CART
 // DELETE
