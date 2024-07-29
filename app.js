@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-const port = 3000;
+const port = 3003;
 const cors = require("cors");
 // Cấu hình MongoDB Atlas
 const dbConfig = require("./config");
@@ -73,6 +73,35 @@ app.post("/vouchers", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Failed to create Voucher", error });
+  }
+});
+// PUT
+app.put("/vouchers/:id", async (req, res) => {
+  const { id } = req.params;
+  const { users, discount, point, status } = req.body;
+  console.log(users, discount, point, status);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "ID không hợp lệ" });
+  }
+  if (!discount || !point) {
+    return res.status(400).json({ message: "lỗi" });
+  }
+
+  try {
+    const updatedVoucher = await Voucher.findOneAndUpdate(
+      { _id: id },
+      { users, discount, point, status },
+      { new: true }
+    );
+
+    if (updatedVoucher) {
+      res.json(updatedVoucher);
+    } else {
+      res.status(404).json({ message: "Table not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to update voucher", error });
   }
 });
 // ORDER CHEF
@@ -710,6 +739,17 @@ app.put("/products/:id", async (req, res) => {
     res.status(500).json({ message: "Failed to update product", error });
   }
 });
+// get user id
+app.get("/users/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get User", error });
+  }
+});
 // Tạo get endpoint user  trả về JSON
 app.get("/users", async (req, res) => {
   try {
@@ -748,12 +788,12 @@ app.delete("/users/:id", async (req, res) => {
 // Tạo endpoint PUT để cập nhật user theo id
 app.put("/users/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, email } = req.body;
+  const { username, phone, isAdmin, email, password, point } = req.body;
   try {
     if (mongoose.connection.readyState === 1) {
       const updatedUser = await User.findByIdAndUpdate(
         id,
-        { name, email },
+        { username, phone, isAdmin, email, password, point },
         { new: true } // Trả về document đã được cập nhật
       );
       if (updatedUser) {
