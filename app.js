@@ -30,7 +30,7 @@ mongoose
   });
 // VOUCHER
 // GET
-app.get("/voucher", async (req, res) => {
+app.get("/vouchers", async (req, res) => {
   try {
     const voucher = await Voucher.find();
 
@@ -41,7 +41,7 @@ app.get("/voucher", async (req, res) => {
   }
 });
 // GET ID
-app.get("/voucher/:id", async (req, res) => {
+app.get("/vouchers/:id", async (req, res) => {
   try {
     const VoucherId = req.params.id;
     const voucher = await Voucher.findById(VoucherId);
@@ -52,7 +52,7 @@ app.get("/voucher/:id", async (req, res) => {
   }
 });
 // POST
-app.post("/voucher", async (req, res) => {
+app.post("/vouchers", async (req, res) => {
   try {
     const { users, discount, point, status } = req.body;
     // console.log(users, discount, point, status);
