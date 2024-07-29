@@ -18,6 +18,7 @@ const Table = require("./models/Table");
 const Order = require("./models/Order");
 const Cart = require("./models/Cart");
 const OrderChef = require("./models/OrderChef");
+const Voucher = require("./models/Voucher");
 mongoose
   .connect(dbConfig.mongoURI, {
     useNewUrlParser: true,
@@ -27,14 +28,60 @@ mongoose
   .catch((err) => {
     console.error("MongoDB connection error:", err);
   });
+// VOUCHER
+// GET
+app.get("/voucher", async (req, res) => {
+  try {
+    const voucher = await Voucher.find();
 
+    res.json(voucher);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get Table", error });
+  }
+});
+// GET ID
+app.get("/voucher/:id", async (req, res) => {
+  try {
+    const VoucherId = req.params.id;
+    const voucher = await Voucher.findById(VoucherId);
+    res.json(voucher);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get Voucher", error });
+  }
+});
+// POST
+app.post("/voucher", async (req, res) => {
+  try {
+    const { users, discount, point, status } = req.body;
+    // console.log(users, discount, point, status);
+    if (!discount || !point) {
+      return res.status(400).json({ message: "không thành công" });
+    }
+
+    const newVoucher = new Voucher({
+      users,
+      discount,
+      point,
+      status,
+    });
+
+    await newVoucher.save();
+
+    res.status(201).json(newVoucher);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create Voucher", error });
+  }
+});
 // ORDER CHEF
 // POST
 app.post("/orderchef", async (req, res) => {
   try {
     const { table_id, products, date, status } = req.body;
     // Kiểm tra dữ liệu đầu vào
-    console.log(table_id, products, date, status);
+    // console.log(table_id, products, date, status);
     if (!table_id || !products || !date) {
       return res.status(400).json({ message: "lỗi" });
     }
