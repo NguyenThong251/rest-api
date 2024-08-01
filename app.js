@@ -19,6 +19,7 @@ const Order = require("./models/Order");
 const Cart = require("./models/Cart");
 const OrderChef = require("./models/OrderChef");
 const Voucher = require("./models/Voucher");
+const Bill = require("./models/Bill");
 mongoose
   .connect(dbConfig.mongoURI, {
     useNewUrlParser: true,
@@ -28,6 +29,34 @@ mongoose
   .catch((err) => {
     console.error("MongoDB connection error:", err);
   });
+// BILL
+app.post("/bill", async (req, res) => {
+  try {
+    const data = ({ user_id, products, total, table_id, date } = req.body);
+    console.log(data);
+    // Kiểm tra dữ liệu đầu vào
+    if (!table_id || !total || !products || !user_id || !date) {
+      return res.status(400).json({ message: "Name and image are required" });
+    }
+
+    // Tạo một đối tượng Category mới
+    const newBill = new Bill({
+      user_id,
+      products,
+      total,
+      table_id,
+      date,
+    });
+
+    await newBill.save();
+
+    res.status(201).json(newBill);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to create Bill", error });
+  }
+});
+
 // VOUCHER
 // GET
 app.get("/vouchers", async (req, res) => {
