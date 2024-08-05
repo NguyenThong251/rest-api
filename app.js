@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-const port = 3003;
+const port = process.env.PORT || 4000;
 const cors = require("cors");
 // Cấu hình MongoDB Atlas
 const dbConfig = require("./config");
